@@ -61,10 +61,10 @@
 
 ### Примеры реализации
 
-- **Redirect Payment**: Смотрите `Onetime/RobokassaProcessor.php` 
-- **Popup/Modal Payment**: Смотрите `assets/js/robokassa-checkout.js`
-- **Web hook Handling**: Смотрите `Webhook/RobokassaWebhook.php`
-- **Settings Management**: Смотрите `Settings/RobokassaSettingsBase.php`
+- **Перенаправить платеж**: Смотрите `Onetime/RobokassaProcessor.php` 
+- **Всплывающий/Модальный платеж**: Смотрите `assets/js/robokassa-checkout.js`
+- **Webhook Обработка**: Смотрите `Webhook/RobokassaWebhook.php`
+- **Управление настройками**: Смотрите `Settings/RobokassaSettingsBase.php`
 
 ## Разработка
 
@@ -112,14 +112,14 @@ robokassa-for-fluent-cart/
 
 Следующие функции требуют реализации:
 
-1. **API Integration**
+1. **API интеграция**
    - [ ] Полная реализация клиента Robokassa API
    - [ ] Вызов API инициализации транзакции
    - [ ] Вызов API проверки транзакции
    - [ ] Создание плана подписки
    - [ ] Управление подпиской
 
-2. **Payment Processing**
+2. **Обработка платежей**
    - [ ] Полная реализация handleSinglePayment
    - [ ] Полная реализация handleSubscription
    - [ ] Реализация обработки возвратов
@@ -129,7 +129,7 @@ robokassa-for-fluent-cart/
    - [ ] Обработчики webhook подписки
    - [ ] Обработчики webhook возвратов
 
-4. **Confirmations**
+4. **Подтверждения**
    - [ ] Проверка платежа по return URL
    - [ ] Подтверждение активации подписки
 
