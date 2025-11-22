@@ -102,7 +102,7 @@ robokassa-for-fluent-cart/
 - `robokassa_fc/subscription_payment_args` - Изменить аргументы платежа подписки
 - `robokassa_fc/robokassa_settings` - Изменить настройки Robokassa
 
-#### Actions
+#### Действия
 
 - `robokassa_fc/payment_success` - Срабатывает при успешном платеже
 - `robokassa_fc/payment_failed` - Срабатывает при неудачном платеже
