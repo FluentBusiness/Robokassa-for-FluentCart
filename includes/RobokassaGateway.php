@@ -204,7 +204,7 @@ class RobokassaGateway extends AbstractPaymentGateway
         );
 
     }
-
+    
     public function fields(): array
     {
         return [
@@ -218,21 +218,79 @@ class RobokassaGateway extends AbstractPaymentGateway
                 'schema' => [
                     [
                         'type'   => 'tab',
-                        'label'  => __('Live credentials', 'robokassa-for-fluent-cart'),
+                        'label'  => __('Base Settings', 'robokassa-for-fluent-cart'),
                         'value'  => 'live',
                         'schema' => [
-                            'live_public_key' => [
-                                'value'       => '',
-                                'label'       => __('Live Public Key', 'robokassa-for-fluent-cart'),
+                            'enabled' => [
+                                'value'   => get_option('robokassa_payment_fluentcart_robokassa_enabled', 'no'),
+                                'label'   => __('Enable Robokassa Payment', 'robokassa-for-fluent-cart'),
+                                'type'    => 'radio',
+                                'options' => [
+                                    'yes' => __('Yes', 'robokassa-for-fluent-cart'),
+                                    'no'  => __('No', 'robokassa-for-fluent-cart'),
+                                ],
+                            ],
+                            'order_page_title' => [
+                                'value'       => get_option('RobokassaOrderPageTitle_robokassa', ''),
+                                'label'       => __('Order Page Title', 'robokassa-for-fluent-cart'),
                                 'type'        => 'text',
-                                'placeholder' => __('pk_live_xxxxxxxxxxxxxxxx', 'robokassa-for-fluent-cart'),
+                                'placeholder' => __('Enter title for order page', 'robokassa-for-fluent-cart'),
                             ],
-                            'live_secret_key' => [
-                                'value'       => '',
-                                'label'       => __('Live Secret Key', 'robokassa-for-fluent-cart'),
-                                'type'        => 'password',
-                                'placeholder' => __('sk_live_xxxxxxxxxxxxxxxx', 'robokassa-for-fluent-cart'),
+                            'order_page_description' => [
+                                'value'       => get_option('RobokassaOrderPageDescription_robokassa', ''),
+                                'label'       => __('Order Page Description', 'robokassa-for-fluent-cart'),
+                                'type'        => 'text',
+                               'placeholder' => __('Enter description for order page', 'robokassa-for-fluent-cart'),
                             ],
+                            'country_code' => [
+                                'value'   => get_option('robokassa_country_code', 'RU'),
+                                'label'   => __('Shop Country', 'robokassa-for-fluent-cart'),
+                                'type'    => 'select',
+                                'options' => [
+                                    'russia' => [
+                                    'label' => __('Russia', 'robokassa-for-fluent-cart'),
+                                    'value' => 'RU'
+                                    ],
+                                    'kazakhstan' => [
+                                    'label' => __('Kazakhstan', 'robokassa-for-fluent-cart'),
+                                    'value' => 'KZ'
+                                    ],                                    
+                                ],
+                            ],                                
+                            'merchant_login' => [
+                            'value'       => get_option('robokassa_payment_MerchantLogin', ''),
+                            'label'       => __('Shop Identifier', 'robokassa-for-fluent-cart'),
+                            'type'        => 'text',
+                            'placeholder' => __('Enter shop identifier', 'robokassa-for-fluent-cart'),
+                            ],
+                            'shop_password_1' => [
+                            'value'       => get_option('robokassa_payment_shoppass1', ''),
+                            'label'       => __('Shop Password #1', 'robokassa-for-fluent-cart'),
+                            'type'        => 'password',
+                            'placeholder' => __('Enter shop password #1', 'robokassa-for-fluent-cart'),
+                            ],
+                            'shop_password_2' => [
+                            'value'       => get_option('robokassa_payment_shoppass2', ''),
+                            'label'       => __('Shop Password #2', 'robokassa-for-fluent-cart'),
+                            'type'        => 'password',
+                            'placeholder' => __('Enter shop password #2', 'robokassa-for-fluent-cart'),
+                            ],
+                            'iframe_enabled' => [
+                            'value'   => (int) get_option('robokassa_iframe', 0),
+                            'label'   => __('Enable iframe', 'robokassa-for-fluent-cart'),
+                            'type'    => 'select',
+                            'options' => [
+                                    'enabled' => [
+                                    'label' => __('Enabled', 'robokassa-for-fluent-cart'),
+                                    'value' => '1'
+                                    ],
+                                    'disabled' => [
+                                    'label' => __('Disabled', 'robokassa-for-fluent-cart'),
+                                    'value' => '0'
+                                    ],                                  
+                            ],
+                            'description' => __('When iframe is enabled, fewer payment methods are available compared to the regular payment page - only cards, Apple and Samsung Pay, Qiwi. Incurlabel works but is limited.', 'robokassa-for-fluent-cart'),
+                            ],                            
                         ]
                     ],
                     [
@@ -240,20 +298,54 @@ class RobokassaGateway extends AbstractPaymentGateway
                         'label'  => __('Test credentials', 'robokassa-for-fluent-cart'),
                         'value'  => 'test',
                         'schema' => [
-                            'test_public_key' => [
-                                'value'       => '',
-                                'label'       => __('Test Public Key', 'robokassa-for-fluent-cart'),
-                                'type'        => 'text',
-                                'placeholder' => __('pk_test_xxxxxxxxxxxxxxxx', 'robokassa-for-fluent-cart'),
+        // === Новые поля: тестовый режим и пароли ===
+                            'test_mode' => [
+                            'value'   => get_option('robokassa_payment_test_onoff', 'false'),
+                            'label'   => __('Test Mode', 'robokassa-for-fluent-cart'),
+                            'type'    => 'radio',
+                            'options' => [
+                                'true'  => __('Enable', 'robokassa-for-fluent-cart'),
+                                'false' => __('Disable', 'robokassa-for-fluent-cart'),
                             ],
-                            'test_secret_key' => [
-                                'value'       => '',
-                                'label'       => __('Test Secret Key', 'robokassa-for-fluent-cart'),
-                                'type'        => 'password',
-                                'placeholder' => __('sk_test_xxxxxxxxxxxxxxxx', 'robokassa-for-fluent-cart'),
+                            ],
+                            'test_shop_password_1' => [
+                            'value'       => get_option('robokassa_payment_testshoppass1', ''),
+                            'label'       => __('Test Shop Password #1', 'robokassa-for-fluent-cart'),
+                            'type'        => 'password',
+                            'placeholder' => __('Enter test shop password #1', 'robokassa-for-fluent-cart'),
+                            ],
+                            'test_shop_password_2' => [
+                            'value'       => get_option('robokassa_payment_testshoppass2', ''),
+                            'label'       => __('Test Shop Password #2', 'robokassa-for-fluent-cart'),
+                            'type'        => 'password',
+                            'placeholder' => __('Enter test shop password #2', 'robokassa-for-fluent-cart'),
                             ],
                         ],
                     ],
+                    [
+                        'type'   => 'tab',
+                        'label'  => __('Badge & Widget', 'robokassa-for-fluent-cart'),
+                        'value'  => 'badge',
+                        'schema' => [
+
+                        ],
+                    ],
+                    [
+                        'type'   => 'tab',
+                        'label'  => __('Notification', 'robokassa-for-fluent-cart'),
+                        'value'  => 'notification',
+                        'schema' => [
+
+                        ],
+                    ],  
+                    [
+                        'type'   => 'tab',
+                        'label'  => __('Registration', 'robokassa-for-fluent-cart'),
+                        'value'  => 'registration',
+                        'schema' => [
+
+                        ],
+                    ],                                       
                 ]
             ],
             'webhook_info' => [

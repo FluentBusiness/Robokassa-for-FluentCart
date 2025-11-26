@@ -49,22 +49,22 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             ]
         ];
 
-        // firstPayment of the subscription, robokassa requires The customer must have already done a transaction for authorization
-        // see details: https://paystack.com/docs/payments/recurring-charges/  
+        // первая оплата подписки; Robokassa требует, чтобы клиент уже совершил транзакцию для авторизации
+        // подробности: https://paystack.com/docs/payments/recurring-charges/      
         if ($firstPayment['amount'] <= 0) {
             $firstPayment['amount'] = RobokassaHelper::getMinimumAmountForAuthorization($transaction->currency);
-            $firstPayment['metadata']['amount_is_for_authorization_only'] = 'yes'; // we'll refund this amount later after confirmation
+            $firstPayment['metadata']['amount_is_for_authorization_only'] = 'yes'; // мы вернем эту сумму позже после подтверждения
         }
 
         
-        // Apply filters for customization
+        // Применение фильтров для настройки
         $firstPayment = apply_filters('fluent_cart/robokassa/subscription_payment_args', $firstPayment, [
             'order'       => $order,
             'transaction' => $transaction,
             'subscription' => $subscription
         ]);
 
-        // Initialize Robokassa transaction
+        // Инициализация транзакции Robokassa
         $robokassaTransaction = RobokassaAPI::createRobokassaObject('transaction/initialize', $firstPayment);
 
         if (is_wp_error($robokassaTransaction)) {
@@ -122,7 +122,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             . $subscription->trial_days . '_'
             . $transaction->currency;
 
-        // make plan first with name, amount, interval, etc.
+        // создание плана с именем, суммой, интервалом и т.д.
         $planData = [
             'name'              => $subscription->item_name,
             'description'       => $fctRobokassaPlanId,   
@@ -148,7 +148,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             'product'   => $product
         ]);
 
-        // checking if this plan already created in robokassa - start (not needed if we could pass something unique to robokassa while creating plan)
+        // проверка, создан ли этот план уже в Robokassa - начало (не требуется, если мы могли бы передать что-то уникальное в Robokassa при создании плана)
         $robokassaPlanCode = $product->getProductMeta($fctRobokassaPlanId);
 
         if ($robokassaPlanCode) {
@@ -157,7 +157,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
                 return $plan;
             }
         }
-        // checking if this plan already created in robokassa - end
+        // проверка, создан ли этот план уже в Robokassa - конец
 
         $plan = RobokassaAPI::createRobokassaObject('plan', $planData);
 
@@ -165,7 +165,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             return $plan;
         }
 
-        // updating robokassa plan id in product meta - for future use
+        // обновление ID плана Robokassa в метаданных продукта - для будущего использования
         $product->updateProductMeta($fctRobokassaPlanId, Arr::get($plan, 'data.plan_code'));
 
         return $plan;
@@ -201,7 +201,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
 
         $authorizationCode = Arr::get($robokassaSubscription, 'data.authorization.authorization_code');
         $subscriptionUpdateData = RobokassaHelper::getSubscriptionUpdateData($robokassaSubscription, $subscriptionModel);
-        // get all transaction for this customer, then match the transactions with vendor_plan_id with plan_code of transactions
+        // получить все транзакции для этого клиента, затем сопоставить транзакции с vendor_plan_id с plan_code транзакций
         $customerTransactions = [];
 
         $next = null;
@@ -270,7 +270,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
 
                         continue;
                     }
-                    // Create new transaction
+                    // Создание новой транзакции
                     $transactionData = [
                         'order_id'         => $order->id,
                         'amount'           => $amount,
@@ -287,7 +287,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
                     $newPayment = true;
                     SubscriptionService::recordRenewalPayment($transactionData, $subscriptionModel, $subscriptionUpdateData);
                 } else if ($transaction->status !== Status::TRANSACTION_SUCCEEDED) {
-                    // Update existing transaction if status has changed
+                    // Обновление существующей транзакции, если статус изменился
                     $transaction->update([
                         'status' => status::TRANSACTION_SUCCEEDED,
                     ]);
@@ -297,7 +297,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             }
         }
 
-        // Update subscription data
+        // Обновление данных подписки
         if (!$newPayment) {
             $subscriptionModel = SubscriptionService::syncSubscriptionStates($subscriptionModel, $subscriptionUpdateData);
         } else {
@@ -308,9 +308,9 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
     }
 
     /**
-     * Create subscription on Robokassa
+     * Создание подписки в Robokassa
      * @param Subscription $subscriptionModel
-     * @param array $args , expects 'customer_code', 'plan_code', 'authorization_code', 'billingInfo'
+     * @param array $args , ожидает 'customer_code', 'plan_code', 'authorization_code', 'billingInfo'
      */
     public function createSubscriptionOnRobokassa($subscriptionModel, $args = [])
     {
@@ -318,7 +318,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
         $startDate = null;
         $oldStatus = $subscriptionModel->status;
 
-        // subscribe customer to plan
+        // подписка клиента на план
 
         if ($subscriptionModel->trial_days > 0) {
             $startDate = time() + ($subscriptionModel->trial_days * DAY_IN_SECONDS);
@@ -338,7 +338,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
 
 
         if (is_wp_error($robokassaSubscription)) {
-            // log the error message
+            // запись сообщения об ошибке
             fluent_cart_add_log(__('Robokassa Subscription Creation Failed', 'robokassa-for-fluent-cart'), __('Failed to create subscription in Robokassa. Error: ', 'robokassa-for-fluent-cart')  . $robokassaSubscription->get_error_message(), 'error', [
                 'module_name' => 'order',
                 'module_id'   => $order->id,
@@ -390,7 +390,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             );
         }
 
-        // Get subscription code and token for cancellation
+        // Получение кода подписки и токена для отмены
         $subscriptionCode = $vendorSubscriptionId;
         $token = $subscriptionModel->getMeta('robokassa_email_token');
 
@@ -401,7 +401,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             );
         }
 
-        // Disable subscription via Robokassa API
+        // Отключение подписки через API Robokassa
         $response = RobokassaAPI::deleteRobokassaObject('subscription/disable', [
             'code'  => $subscriptionCode,
             'token' => $token
@@ -423,7 +423,7 @@ class RobokassaSubscriptions extends AbstractSubscriptionModule
             );
         }
 
-        // Update subscription status
+        // Обновление статуса подписки
         $subscriptionModel->update([
             'status'     => Status::SUBSCRIPTION_CANCELED,
             'canceled_at' => DateTime::gmtNow()->format('Y-m-d H:i:s')

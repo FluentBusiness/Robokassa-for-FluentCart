@@ -20,13 +20,13 @@ class RobokassaWebhook
 {
     public function init()
     {
-        add_action('fluent_cart/payments/robokassa/webhook_charge_success', [$this, 'handleChargeSuccess'], 10, 1); // done
-        add_action('fluent_cart/payments/robokassa/webhook_subscription_create', [$this, 'handleSubscriptionCreate'], 10, 1); // done
+        add_action('fluent_cart/payments/robokassa/webhook_charge_success', [$this, 'handleChargeSuccess'], 10, 1); // готово
+        add_action('fluent_cart/payments/robokassa/webhook_subscription_create', [$this, 'handleSubscriptionCreate'], 10, 1); // готово
         add_action('fluent_cart/payments/robokassa/webhook_subscription_not_renew', [$this, 'handleSubscriptionCanceled'], 10, 1);
-        add_action('fluent_cart/payments/robokassa/webhook_refund_processed', [$this, 'handleRefundProcessed'], 10, 1); // done
+        add_action('fluent_cart/payments/robokassa/webhook_refund_processed', [$this, 'handleRefundProcessed'], 10, 1); // готово
 
-        add_action('fluent_cart/payments/robokassa/webhook_invoice_create', [$this, 'handleInvoiceCreate'], 10, 1); // not handling
-        add_action('fluent_cart/payments/robokassa/webhook_invoice_update', [$this, 'handleInvoiceUpdate'], 10, 1); // done
+        add_action('fluent_cart/payments/robokassa/webhook_invoice_create', [$this, 'handleInvoiceCreate'], 10, 1); // не обрабатывается
+        add_action('fluent_cart/payments/robokassa/webhook_invoice_update', [$this, 'handleInvoiceUpdate'], 10, 1); // готово
 
         // .... остальные обработчики вебхуков можно добавить здесь
     }
@@ -82,7 +82,7 @@ class RobokassaWebhook
     {
         $input = file_get_contents('php://input');
         
-        // Check payload size (max 1MB)
+        // Проверить размер полезной нагрузки (максимум 1 МБ)
         if (strlen($input) > 1048576) {
             return new \WP_Error('payload_too_large', 'Webhook payload too large');
         }
@@ -97,7 +97,7 @@ class RobokassaWebhook
     
     private function verifySignature($payload)
     {
-        // Sanitize server input
+        // Очистить входные данные сервера
         $signature = isset($_SERVER['HTTP_X_ROBOKASSA_SIGNATURE']) ? sanitize_text_field(wp_unslash($_SERVER['HTTP_X_ROBOKASSA_SIGNATURE'])) : '';
         
         if (!$signature) {
@@ -124,7 +124,7 @@ class RobokassaWebhook
         $transactionMeta = Arr::get($robokassaTransaction, 'metadata', []);
         $transactionHash = Arr::get($transactionMeta, 'transaction_hash', '');
 
-        // Find the transaction by UUID
+        // Найти транзакцию по UUID
         $transactionModel = null;
 
         if ($transactionHash) {
@@ -150,7 +150,7 @@ class RobokassaWebhook
                 ->first();
         }
 
-        // Check if already processed
+        // Проверить, не была ли транзакция уже обработана
         if ($transactionModel->status == Status::TRANSACTION_SUCCEEDED) {
             wp_send_json([
                 'redirect_url' => $transactionModel->getReceiptPageUrl(),
@@ -260,14 +260,13 @@ class RobokassaWebhook
    
     public function handleInvoiceCreate($data)
     {
-        // Вы можете реализовать любую логику, необходимую при создании счета.
+        // Вы можете реализовать любую логику, необходимую при создании счёта.
         // Пока что мы просто регистрируем событие.
-        // реализовать при необходимости;
-        // например, отправить уведомление администратору или клиенту
-
+        // Реализовать при необходимости;
+        // Например, отправить уведомление администратору или клиенту.
     }
 
-    // handling invoice paid
+    // Обработка оплаты счёта
     public function handleInvoiceUpdate($data)
     {
         $invoice = Arr::get($data, 'payload');
@@ -343,7 +342,7 @@ class RobokassaWebhook
         $amount = Arr::get($refund, 'amount');
         $refundCurrency = Arr::get($refund, 'currency');
 
-        // Prepare refund data matching Stripe pattern
+        // Подготовить данные о возврате, соответствующие формату Stripe
         $refundData = [
             'order_id'           => $order->id,
             'transaction_type'   => Status::TRANSACTION_TYPE_REFUND,
@@ -381,7 +380,7 @@ class RobokassaWebhook
             $order = Order::query()->where('uuid', $orderHash)->first();
         }
 
-        // transaction reference
+        // Ссылка на транзакцию
         $transactionreference = Arr::get($data, 'data.transaction_reference');
 
         if ($transactionreference && !$order) {
