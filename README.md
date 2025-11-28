@@ -40,7 +40,7 @@
 
 ## Настройка
 
-1. Получите ваши API ключи из [Robokassa Dashboard](https://dashboard.robokassa.com/#/settings/developer)
+1. Получите ваши API ключи в разделе "Мои магазины" вашего ЛК, открыв нужный магазин, в закладке "Технические настройки"
 2. Добавьте ваши тестовые/рабочие публичные и секретные ключи в настройки FluentCart Robokassa
 3. Настройте webhook URL в Robokassa Dashboard:
    ```
